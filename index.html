@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dabparty3</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.1s ease;
+        }
+
+        h6 {
+            color: white;
+            text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            font-size: 10px
+        }
+
+        section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        h2, p {
+            color: white;
+            text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: black;
+            text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .box {
+            margin-top: 20px;
+            width: 300px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<section id="section-1" class="visible">
+    <h1>Hi.</h1>
+    <div class="box">
+        I am somebody on the internet.
+        <br>
+        Nobody you would know.
+        <br>
+        <h2>HOWEVER.</h2>
+        You very well may know me.
+        <br>
+        However... It's not probable.
+    </div>
+</section>
+
+<section id="section-2" class="hidden">
+    <h1>Projects</h1>
+    <div class="box">
+        I have numerous projects that I have worked on. However, many are not as cool as others.
+        <br>
+        <h6>(however, i'm always cool)</h6>
+        The main one I'm working on right now is Insomnia.
+        <h6>(not public rn)</h6>
+        <h2>STILL.</h2>
+        <br>
+        Actually... That's all.
+    </div>
+</section>
+
+<section id="section-3" class="hidden">
+    <h1>There isn't anything else here...</h1>
+    <div class="box">
+        GET THE FUCK OUT OF MY HOUSE!!!
+        <br>
+        (thanks for taking the time to visit this page i guess)
+    </div>
+</section>
+
+<script>
+    const sections = document.querySelectorAll("section");
+    let currentSection = 0;
+
+    window.addEventListener("scroll", () => {
+        const scrollY = window.scrollY;
+        const viewportHeight = window.innerHeight;
+
+        if (scrollY > currentSection * viewportHeight + viewportHeight / 2) {
+            if (currentSection < sections.length - 1) {
+                sections[currentSection].classList.remove("visible");
+                sections[currentSection].classList.add("hidden");
+                currentSection++;
+                sections[currentSection].classList.remove("hidden");
+                sections[currentSection].classList.add("visible");
+            }
+        }
+
+        if (scrollY < currentSection * viewportHeight - viewportHeight / 2) {
+            if (currentSection > 0) {
+                sections[currentSection].classList.remove("visible");
+                sections[currentSection].classList.add("hidden");
+                currentSection--;
+                sections[currentSection].classList.remove("hidden");
+                sections[currentSection].classList.add("visible");
+            }
+        }
+    });
+
+    document.addEventListener('mousemove', (event) => {
+        const x = event.clientX;
+        const y = event.clientY;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        const red = Math.round((x / width) * 255);
+        const green = Math.round((y / height) * 255);
+        const blue = Math.round(((x + y) / (width + height)) * 255);
+
+        document.body.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
+    });
+</script>
+</body>
+</html>
