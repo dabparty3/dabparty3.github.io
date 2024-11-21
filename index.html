@@ -15,7 +15,7 @@
         h6 {
             color: white;
             text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-            font-size: 10px
+            font-size: 10px;
         }
 
         section {
@@ -31,10 +31,12 @@
             color: white;
             text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
         }
+
         h1 {
             color: black;
             text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
         }
+
         .hidden {
             opacity: 0;
             pointer-events: none;
@@ -54,10 +56,42 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
             text-align: center;
         }
+
+        .button {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            color: black;
+            font-size: 16px;
+            cursor: pointer;
+            text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .button:hover {
+            background-color: rgba(200, 200, 200, 0.8);
+            transform: scale(1.05);
+        }
+
+        #gif {
+            position: fixed;
+            top: -150px;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            opacity: 0;
+            transition: top 1s ease, opacity 1s ease;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
 <section id="section-1" class="visible">
+    <button class="button" onclick="playSoundAndToggleGif()">don't click it..!!</button>
     <h1>Hi.</h1>
     <div class="box">
         I am somebody on the internet.
@@ -93,6 +127,11 @@
         (thanks for taking the time to visit this page i guess)
     </div>
 </section>
+
+<audio id="sound" src="skibdi2.mp3" loop></audio>
+<audio id="sound2" src="skibidi.mp3" loop></audio>
+
+<img id="gif" src="tenor.gif" alt="Dancing GIF">
 
 <script>
     const sections = document.querySelectorAll("section");
@@ -135,6 +174,30 @@
 
         document.body.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
     });
+
+    let gifVisible = false;
+
+    function playSoundAndToggleGif() {
+        const audio = document.getElementById("sound");
+        const gif = document.getElementById("gif");
+        const audio2 = document.getElementById("sound2");
+
+        if (!gifVisible) {
+            audio.play();
+            audio2.play();
+            gif.style.top = "0";
+            gif.style.opacity = "1";
+        } else {
+            audio.pause();
+            audio2.pause();
+            audio.currentTime = 0;
+            audio2.currentTime = 0;
+            gif.style.top = "-150px";
+            gif.style.opacity = "0";
+        }
+
+        gifVisible = !gifVisible;
+    }
 </script>
 </body>
 </html>
