@@ -21,7 +21,6 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      transition: opacity 0.6s ease-in;
     }
 
     #terminal {
@@ -82,7 +81,7 @@ clear       - Clear the terminal
 echo [text] - Repeat text
 about       - Info about this page
 fullscreen  - Make the page fullscreen
-example     - CRT shutdown & redirect
+example     - Redirect to example.html
 example1    - Show static & play static.wav`,
       clear: () => {
         terminal.innerHTML = "";
@@ -100,8 +99,8 @@ example1    - Show static & play static.wav`,
         }
       },
       example: () => {
-        renderLine("Running example...");
-        setTimeout(() => playCRTShutdown(), 500);
+        renderLine("Opening example.html...");
+        setTimeout(() => window.location.href = "example.html", 500);
         return "";
       },
       example1: () => {
@@ -194,51 +193,6 @@ example1    - Show static & play static.wav`,
       renderLine("(c) CarDoor Corporations. All rights reserved.");
       renderLine("Use 'help' for a list of commands.");
       renderLine("");
-    }
-
-    function playCRTShutdown() {
-      const terminalWrapper = document.getElementById('terminal-wrapper');
-      terminalWrapper.style.transition = 'opacity 0.6s ease-in';
-      terminalWrapper.style.opacity = '1';
-
-      const overlay = document.createElement('div');
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100vw';
-      overlay.style.height = '100vh';
-      overlay.style.background = 'transparent';
-      overlay.style.display = 'flex';
-      overlay.style.justifyContent = 'center';
-      overlay.style.alignItems = 'center';
-      overlay.style.zIndex = '9999';
-      overlay.style.pointerEvents = 'none';
-
-      overlay.innerHTML = `<div id="dot" style="
-        width: 100vw;
-        height: 100vh;
-        background: #00ff00;
-        border-radius: 50%;
-        transition: all 0.6s ease-in;
-      "></div>`;
-
-      document.body.appendChild(overlay);
-
-      const audio = new Audio("tvturnoff.wav");
-      audio.play();
-
-      setTimeout(() => {
-        terminalWrapper.style.opacity = '0';
-        const dot = document.getElementById("dot");
-        dot.style.width = "4px";
-        dot.style.height = "4px";
-        dot.style.background = "white";
-      }, 100);
-
-      setTimeout(() => {
-        overlay.remove();
-        window.location.href = "example.html";
-      }, 1400);
     }
 
     function showStaticOverlay() {
