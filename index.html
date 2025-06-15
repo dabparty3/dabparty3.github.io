@@ -99,7 +99,7 @@
       width: 100vw;
       height: 100vh;
       background: url('static.gif') center center / cover no-repeat black;
-      z-index: 10002;
+      z-index: 10002; /* On top of iframe */
     }
   </style>
 </head>
@@ -114,7 +114,7 @@
     let history = [];
     let historyIndex = -1;
     let input = "";
-    let inputEnabled = true; // New flag to disable terminal input when iframe active
+    let inputEnabled = true; // disable input when overlay active
 
     const commands = {
       help: () => `Available commands:
@@ -153,9 +153,7 @@ example1    - Overlay example page over this page`,
       example1: () => {
         renderLine("Activating static, then opening example overlay...");
         inputEnabled = false;  // disable input now
-        showStaticOverlay().then(() => {
-          showExampleOverlay();
-        });
+        showExampleOverlayWithStatic();
         return "";
       }
     };
@@ -244,10 +242,11 @@ example1    - Overlay example page over this page`,
       });
     }
 
-    // Show the example page as a fullscreen iframe overlay
-    function showExampleOverlay() {
+    // Show the example overlay immediately, then show static on top for 3 seconds
+    async function showExampleOverlayWithStatic() {
       if(document.getElementById('example-overlay')) return;
 
+      // Create iframe overlay (hidden behind static)
       const overlay = document.createElement('div');
       overlay.id = 'example-overlay';
 
@@ -270,6 +269,11 @@ example1    - Overlay example page over this page`,
       overlay.appendChild(closeBtn);
       overlay.appendChild(iframe);
       document.body.appendChild(overlay);
+
+      // Now show static overlay for 3 seconds on top while iframe loads
+      await showStaticOverlay();
+
+      // Static overlay removed by showStaticOverlay itself after 3 seconds
     }
 
     terminal.addEventListener('keydown', (e) => {
