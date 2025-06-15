@@ -23,8 +23,9 @@
       }
     },
     example: () => {
-      playCRTShutdown();
-      return "Shutting down terminal...";
+      renderLine("Running example...");
+      setTimeout(() => playCRTShutdown(), 500);
+      return ""; // Output already shown above
     }
   };
 
@@ -114,7 +115,6 @@
   }
 
   function playCRTShutdown() {
-    // Create blackout overlay
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
     overlay.style.top = '0';
@@ -129,25 +129,23 @@
     overlay.innerHTML = `<div id="dot" style="width: 100vw; height: 100vh; background: #00ff00; border-radius: 50%; transition: all 0.6s ease-in;"></div>`;
     document.body.appendChild(overlay);
 
-    // Play sound
-    const audio = new Audio("tv-off.mp3"); // <-- Replace with your path or hosted audio
+    const audio = new Audio("tvturnoff.wav");
     audio.play();
 
-    // Shrink to dot, then fade to black
     setTimeout(() => {
       const dot = document.getElementById("dot");
       dot.style.width = "4px";
       dot.style.height = "4px";
       dot.style.background = "white";
-    }, 50);
+    }, 100);
 
     setTimeout(() => {
       overlay.style.background = "black";
-    }, 650);
+    }, 700);
 
     setTimeout(() => {
       window.location.href = "example.html";
-    }, 1500);
+    }, 1400);
   }
 
   // Init
