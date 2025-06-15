@@ -92,7 +92,7 @@ clear       - Clear the terminal
 echo [text] - Repeat text
 about       - Info about this page
 fullscreen  - Make the page fullscreen
-example     - Redirect to example.html
+example     - Show static & play static.wav
 example1    - Show example overlay`,
 
       clear: () => {
@@ -114,8 +114,8 @@ example1    - Show example overlay`,
       },
 
       example: () => {
-        renderLine("Opening example.html...");
-        setTimeout(() => window.location.href = "example.html", 500);
+        renderLine("Activating static...");
+        setTimeout(showStaticOverlay, 500);
         return "";
       },
 
@@ -175,6 +175,34 @@ example1    - Show example overlay`,
       renderLine("Car Door Terminal [Version 10.0.19045.5965]");
       renderLine("(c) CarDoor Corporations. All rights reserved.");
       renderLine("Use 'help' for a list of commands.\n");
+    }
+
+    // Static overlay with audio for "example"
+    function showStaticOverlay() {
+      // Prevent multiple overlays
+      if(document.getElementById('static-overlay')) return;
+
+      const overlay = document.createElement('div');
+      overlay.id = 'static-overlay';
+      overlay.style = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: url('static.gif') center center / cover no-repeat black;
+        z-index: 9999;
+      `;
+      document.body.appendChild(overlay);
+
+      const audio = new Audio('static.wav');
+      audio.play();
+
+      setTimeout(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        overlay.remove();
+      }, 3000);
     }
 
     // Show the example page as an overlay on top of the terminal
