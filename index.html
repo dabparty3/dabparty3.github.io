@@ -57,6 +57,20 @@
       background: #00ff00;
       color: black;
     }
+
+    /* Close button style for overlay */
+    #example-overlay-close {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 10000;
+      background: #222;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
@@ -79,7 +93,7 @@ echo [text] - Repeat text
 about       - Info about this page
 fullscreen  - Make the page fullscreen
 example     - Redirect to example.html
-example1    - Show static & play static.wav`,
+example1    - Show example overlay`,
 
       clear: () => {
         terminal.innerHTML = "";
@@ -106,8 +120,8 @@ example1    - Show static & play static.wav`,
       },
 
       example1: () => {
-        renderLine("Activating static...");
-        setTimeout(showStaticOverlay, 500);
+        renderLine("Loading example overlay...");
+        setTimeout(showExampleOverlay, 500);
         return "";
       }
     };
@@ -163,27 +177,51 @@ example1    - Show static & play static.wav`,
       renderLine("Use 'help' for a list of commands.\n");
     }
 
-    function showStaticOverlay() {
+    // Show the example page as an overlay on top of the terminal
+    function showExampleOverlay() {
+      // Check if overlay already exists
+      if(document.getElementById('example-overlay')) return;
+
       const overlay = document.createElement('div');
+      overlay.id = 'example-overlay';
       overlay.style = `
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: url('static.gif') center center / cover no-repeat black;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: #000;
         z-index: 9999;
+        overflow: auto;
+        color: #0f0;
+        font-family: monospace;
+        padding: 20px;
       `;
+
+      const closeBtn = document.createElement('button');
+      closeBtn.id = 'example-overlay-close';
+      closeBtn.textContent = "Close Overlay";
+      closeBtn.onclick = () => overlay.remove();
+
+      overlay.appendChild(closeBtn);
+
+      // Fetch the external page content
+      fetch('https://dabparty3.github.io/example')
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to load example page');
+          return response.text();
+        })
+        .then(html => {
+          const contentDiv = document.createElement('div');
+          contentDiv.innerHTML = html;
+
+          // Optionally sanitize or remove scripts here if you want
+
+          overlay.appendChild(contentDiv);
+        })
+        .catch(err => {
+          overlay.textContent = "Error loading example page: " + err.message;
+        });
+
       document.body.appendChild(overlay);
-
-      const audio = new Audio('static.wav');
-      audio.play();
-
-      setTimeout(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        overlay.remove();
-      }, 3000);
     }
 
     terminal.addEventListener('keydown', (e) => {
