@@ -21,6 +21,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
+      transition: opacity 0.6s ease-in;
     }
 
     #terminal {
@@ -196,24 +197,38 @@ example1    - Show static & play static.wav`,
     }
 
     function playCRTShutdown() {
+      const terminalWrapper = document.getElementById('terminal-wrapper');
+      terminalWrapper.style.transition = 'opacity 0.6s ease-in';
+      terminalWrapper.style.opacity = '1';
+
       const overlay = document.createElement('div');
       overlay.style.position = 'fixed';
       overlay.style.top = '0';
       overlay.style.left = '0';
       overlay.style.width = '100vw';
       overlay.style.height = '100vh';
-      overlay.style.background = 'black';
+      overlay.style.background = 'transparent';
       overlay.style.display = 'flex';
       overlay.style.justifyContent = 'center';
       overlay.style.alignItems = 'center';
       overlay.style.zIndex = '9999';
-      overlay.innerHTML = `<div id="dot" style="width: 100vw; height: 100vh; background: #00ff00; border-radius: 50%; transition: all 0.6s ease-in;"></div>`;
+      overlay.style.pointerEvents = 'none';
+
+      overlay.innerHTML = `<div id="dot" style="
+        width: 100vw;
+        height: 100vh;
+        background: #00ff00;
+        border-radius: 50%;
+        transition: all 0.6s ease-in;
+      "></div>`;
+
       document.body.appendChild(overlay);
 
       const audio = new Audio("tvturnoff.wav");
       audio.play();
 
       setTimeout(() => {
+        terminalWrapper.style.opacity = '0';
         const dot = document.getElementById("dot");
         dot.style.width = "4px";
         dot.style.height = "4px";
@@ -221,12 +236,7 @@ example1    - Show static & play static.wav`,
       }, 100);
 
       setTimeout(() => {
-        const dot = document.getElementById("dot");
-        if (dot) dot.remove();
-        overlay.style.background = "black";
-      }, 700);
-
-      setTimeout(() => {
+        overlay.remove();
         window.location.href = "example.html";
       }, 1400);
     }
@@ -249,7 +259,7 @@ example1    - Show static & play static.wav`,
         audio.pause();
         audio.currentTime = 0;
         overlay.remove();
-      }, 3000); // 3 seconds
+      }, 3000);
     }
 
     // Init
