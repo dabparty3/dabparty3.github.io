@@ -75,7 +75,14 @@
     let input = "";
 
     const commands = {
-      help: () => "Available commands:\nhelp - Shows list of commands\nclear - Clear the terminal\necho [text] - Repeat text\nabout - Info about this page\nfullscreen - Make the page fullscreen\nexample - Simulate CRT shutdown & go to example.html\nexample1 - Show static.gif and play static.wav",
+      help: () => `Available commands:
+help        - Show this list
+clear       - Clear the terminal
+echo [text] - Repeat text
+about       - Info about this page
+fullscreen  - Make the page fullscreen
+example     - CRT shutdown & redirect
+example1    - Show static & play static.wav`,
       clear: () => {
         terminal.innerHTML = "";
         return "";
@@ -184,7 +191,7 @@
     function bootScreen() {
       renderLine("Car Door Terminal [Version 10.0.19045.5965]");
       renderLine("(c) CarDoor Corporations. All rights reserved.");
-      renderLine("Use 'Help' for a list of commands.");
+      renderLine("Use 'help' for a list of commands.");
       renderLine("");
     }
 
@@ -238,10 +245,11 @@
       const audio = new Audio('static.wav');
       audio.play();
 
-      // Optional: auto-remove static after a few seconds
       setTimeout(() => {
+        audio.pause();
+        audio.currentTime = 0;
         overlay.remove();
-      }, 3000);
+      }, 3000); // 3 seconds
     }
 
     // Init
