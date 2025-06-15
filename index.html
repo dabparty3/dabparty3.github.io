@@ -209,6 +209,8 @@
       }, 100);
 
       setTimeout(() => {
+        const dot = document.getElementById("dot");
+        if (dot) dot.remove(); // Remove the dot completely here
         overlay.style.background = "black";
       }, 700);
 
