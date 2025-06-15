@@ -1,8 +1,72 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>example</title>
-  </head>
-  <body>
-    <p>hello</p>
-  </body>
+<head>
+  <title>example</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #eee;
+      user-select: none;
+    }
+    #brick {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: #b33;
+      top: 50px;
+      left: 50px;
+      border-radius: 4px;
+    }
+    p {
+      margin: 10px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <p>hello</p>
+  <div id="brick"></div>
+
+  <script>
+    const brick = document.getElementById('brick');
+    const step = 5; // pixels per key press
+    let posX = 50;
+    let posY = 50;
+
+    // Keep the brick inside the viewport
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      switch(e.key.toLowerCase()) {
+        case 'w':
+          posY -= step;
+          break;
+        case 'a':
+          posX -= step;
+          break;
+        case 's':
+          posY += step;
+          break;
+        case 'd':
+          posX += step;
+          break;
+        default:
+          return; // do nothing if other keys
+      }
+      // clamp position so it doesn't go off screen
+      const maxX = window.innerWidth - brick.offsetWidth;
+      const maxY = window.innerHeight - brick.offsetHeight;
+      posX = clamp(posX, 0, maxX);
+      posY = clamp(posY, 0, maxY);
+
+      brick.style.left = posX + 'px';
+      brick.style.top = posY + 'px';
+
+      e.preventDefault(); // prevent scrolling or other default behavior
+    });
+  </script>
+</body>
 </html>
