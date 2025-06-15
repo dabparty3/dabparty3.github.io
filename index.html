@@ -3,13 +3,17 @@
 <head>
   <title>The Lobby</title>
   <style>
-    body {
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
       background: #000;
       color: #00ff00;
       font-family: monospace;
-      padding: 10px;
-      height: 100vh;
       overflow: hidden;
     }
 
@@ -23,6 +27,7 @@
       flex-grow: 1;
       overflow-y: auto;
       white-space: pre-wrap;
+      padding: 10px;
     }
 
     .input-line {
@@ -70,13 +75,22 @@
     let input = "";
 
     const commands = {
-      help: () => "Available commands:\nhelp - Show this help\nclear - Clear the terminal\necho [text] - Repeat text\nabout - Info about this page",
+      help: () => "Available commands:\nhelp - Show this help\nclear - Clear the terminal\necho [text] - Repeat text\nabout - Info about this page\nfullscreen - Make the page fullscreen",
       clear: () => {
         terminal.innerHTML = "";
         return "";
       },
       echo: (args) => args.join(" "),
-      about: () => "blank until i can think of ideas"
+      about: () => "Welcome to The Lobby. This is a static terminal-style interface. Have fun!",
+      fullscreen: () => {
+        const el = document.documentElement;
+        if (el.requestFullscreen) {
+          el.requestFullscreen();
+          return "Entering fullscreen...";
+        } else {
+          return "Fullscreen not supported.";
+        }
+      }
     };
 
     function renderLine(text, className = "output") {
