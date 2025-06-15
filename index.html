@@ -1,157 +1,228 @@
-<script>
-  const terminal = document.getElementById('terminal');
-  const PROMPT = "guest@thelobby:~$ ";
-  let history = [];
-  let historyIndex = -1;
-  let input = "";
+<!DOCTYPE html>
+<html>
+<head>
+  <title>The Terminal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  const commands = {
-    help: () => "Available commands:\nhelp - Shows list of commands\nclear - Clear the terminal\necho [text] - Repeat text\nabout - Info about this page\nfullscreen - Make the page fullscreen\nexample - Test CRT shutdown transition",
-    clear: () => {
-      terminal.innerHTML = "";
-      return "";
-    },
-    echo: (args) => args.join(" "),
-    about: () => "Hey there. This is something I made to house my projects... It's pretty cool, right?",
-    fullscreen: () => {
-      const el = document.documentElement;
-      if (el.requestFullscreen) {
-        el.requestFullscreen();
-        return "Entering fullscreen...";
-      } else {
-        return "Fullscreen not supported.";
+    html, body {
+      height: 100%;
+      background: #000;
+      color: #00ff00;
+      font-family: monospace;
+      overflow: hidden;
+    }
+
+    #terminal-wrapper {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #terminal {
+      flex-grow: 1;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      padding: 10px;
+    }
+
+    .input-line {
+      display: inline;
+    }
+
+    .prompt {
+      color: #0f0;
+    }
+
+    .command {
+      color: #fff;
+    }
+
+    .output {
+      color: #0f0;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      animation: blink 1s step-start 0s infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    ::selection {
+      background: #00ff00;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal-wrapper">
+    <div id="terminal" tabindex="0"></div>
+  </div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const PROMPT = "guest@thelobby:~$ ";
+    let history = [];
+    let historyIndex = -1;
+    let input = "";
+
+    const commands = {
+      help: () => "Available commands:\nhelp - Shows list of commands\nclear - Clear the terminal\necho [text] - Repeat text\nabout - Info about this page\nfullscreen - Make the page fullscreen\nexample - Simulate CRT shutdown & go to example.html",
+      clear: () => {
+        terminal.innerHTML = "";
+        return "";
+      },
+      echo: (args) => args.join(" "),
+      about: () => "Hey there. This is something I made to house my projects... It's pretty cool, right?",
+      fullscreen: () => {
+        const el = document.documentElement;
+        if (el.requestFullscreen) {
+          el.requestFullscreen();
+          return "Entering fullscreen...";
+        } else {
+          return "Fullscreen not supported.";
+        }
+      },
+      example: () => {
+        renderLine("Running example...");
+        setTimeout(() => playCRTShutdown(), 500);
+        return "";
       }
-    },
-    example: () => {
-      renderLine("Running example...");
-      setTimeout(() => playCRTShutdown(), 500);
-      return ""; // Output already shown above
+    };
+
+    function renderLine(text, className = "output") {
+      const line = document.createElement('div');
+      line.className = className;
+      line.textContent = text;
+      terminal.appendChild(line);
     }
-  };
 
-  function renderLine(text, className = "output") {
-    const line = document.createElement('div');
-    line.className = className;
-    line.textContent = text;
-    terminal.appendChild(line);
-  }
-
-  function renderPrompt() {
-    const promptLine = document.createElement('div');
-    promptLine.className = "input-line";
-    promptLine.innerHTML = `<span class="prompt">${PROMPT}</span><span class="command" id="input"></span><span class="cursor">█</span>`;
-    terminal.appendChild(promptLine);
-  }
-
-  function processCommand(cmd) {
-    if (!cmd.trim()) return;
-    const args = cmd.split(" ");
-    const base = args.shift().toLowerCase();
-    const action = commands[base];
-    if (action) {
-      const result = action(args);
-      if (result) renderLine(result);
-    } else {
-      renderLine(`Command not found: ${base}`);
+    function renderPrompt() {
+      const promptLine = document.createElement('div');
+      promptLine.className = "input-line";
+      promptLine.innerHTML = `<span class="prompt">${PROMPT}</span><span class="command" id="input"></span><span class="cursor">█</span>`;
+      terminal.appendChild(promptLine);
     }
-  }
 
-  function commitInput() {
-    const inputLine = document.getElementById("input").textContent;
-    const fullLine = PROMPT + inputLine;
+    function processCommand(cmd) {
+      if (!cmd.trim()) return;
+      const args = cmd.split(" ");
+      const base = args.shift().toLowerCase();
+      const action = commands[base];
+      if (action) {
+        const result = action(args);
+        if (result) renderLine(result);
+      } else {
+        renderLine(`Command not found: ${base}`);
+      }
+    }
 
-    const last = terminal.lastElementChild;
-    if (last) terminal.removeChild(last);
+    function commitInput() {
+      const inputLine = document.getElementById("input").textContent;
+      const fullLine = PROMPT + inputLine;
 
-    renderLine(fullLine);
-    history.push(inputLine);
-    historyIndex = history.length;
-    processCommand(inputLine);
-    input = "";
+      const last = terminal.lastElementChild;
+      if (last) terminal.removeChild(last);
+
+      renderLine(fullLine);
+      history.push(inputLine);
+      historyIndex = history.length;
+      processCommand(inputLine);
+      input = "";
+      renderPrompt();
+      scrollToBottom();
+    }
+
+    function updateInput() {
+      const inputEl = document.getElementById("input");
+      if (inputEl) inputEl.textContent = input;
+    }
+
+    function scrollToBottom() {
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    terminal.addEventListener('keydown', (e) => {
+      e.preventDefault();
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        input += e.key;
+      } else if (e.key === "Backspace") {
+        input = input.slice(0, -1);
+      } else if (e.key === "Enter") {
+        commitInput();
+      } else if (e.key === "ArrowUp") {
+        if (historyIndex > 0) {
+          historyIndex--;
+          input = history[historyIndex];
+        }
+      } else if (e.key === "ArrowDown") {
+        if (historyIndex < history.length - 1) {
+          historyIndex++;
+          input = history[historyIndex];
+        } else {
+          input = "";
+          historyIndex = history.length;
+        }
+      }
+      updateInput();
+      scrollToBottom();
+    });
+
+    function bootScreen() {
+      renderLine("Car Door Terminal [Version 10.0.19045.5965]");
+      renderLine("(c) CarDoor Corporations. All rights reserved.");
+      renderLine("Use 'Help' for a list of commands.");
+      renderLine("");
+    }
+
+    function playCRTShutdown() {
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.background = 'black';
+      overlay.style.display = 'flex';
+      overlay.style.justifyContent = 'center';
+      overlay.style.alignItems = 'center';
+      overlay.style.zIndex = '9999';
+      overlay.innerHTML = `<div id="dot" style="width: 100vw; height: 100vh; background: #00ff00; border-radius: 50%; transition: all 0.6s ease-in;"></div>`;
+      document.body.appendChild(overlay);
+
+      const audio = new Audio("tvturnoff.wav");
+      audio.play();
+
+      setTimeout(() => {
+        const dot = document.getElementById("dot");
+        dot.style.width = "4px";
+        dot.style.height = "4px";
+        dot.style.background = "white";
+      }, 100);
+
+      setTimeout(() => {
+        overlay.style.background = "black";
+      }, 700);
+
+      setTimeout(() => {
+        window.location.href = "example.html";
+      }, 1400);
+    }
+
+    // Init
+    bootScreen();
     renderPrompt();
+    terminal.focus();
     scrollToBottom();
-  }
-
-  function updateInput() {
-    const inputEl = document.getElementById("input");
-    if (inputEl) inputEl.textContent = input;
-  }
-
-  function scrollToBottom() {
-    terminal.scrollTop = terminal.scrollHeight;
-  }
-
-  terminal.addEventListener('keydown', (e) => {
-    e.preventDefault();
-    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      input += e.key;
-    } else if (e.key === "Backspace") {
-      input = input.slice(0, -1);
-    } else if (e.key === "Enter") {
-      commitInput();
-    } else if (e.key === "ArrowUp") {
-      if (historyIndex > 0) {
-        historyIndex--;
-        input = history[historyIndex];
-      }
-    } else if (e.key === "ArrowDown") {
-      if (historyIndex < history.length - 1) {
-        historyIndex++;
-        input = history[historyIndex];
-      } else {
-        input = "";
-        historyIndex = history.length;
-      }
-    }
-    updateInput();
-    scrollToBottom();
-  });
-
-  function bootScreen() {
-    renderLine("Car Door Terminal [Version 10.0.19045.5965]");
-    renderLine("(c) CarDoor Corporations. All rights reserved.");
-    renderLine("Use 'Help' for a list of commands.");
-    renderLine("");
-  }
-
-  function playCRTShutdown() {
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100vw';
-    overlay.style.height = '100vh';
-    overlay.style.background = 'black';
-    overlay.style.display = 'flex';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
-    overlay.style.zIndex = '9999';
-    overlay.innerHTML = `<div id="dot" style="width: 100vw; height: 100vh; background: #00ff00; border-radius: 50%; transition: all 0.6s ease-in;"></div>`;
-    document.body.appendChild(overlay);
-
-    const audio = new Audio("tvturnoff.wav");
-    audio.play();
-
-    setTimeout(() => {
-      const dot = document.getElementById("dot");
-      dot.style.width = "4px";
-      dot.style.height = "4px";
-      dot.style.background = "white";
-    }, 100);
-
-    setTimeout(() => {
-      overlay.style.background = "black";
-    }, 700);
-
-    setTimeout(() => {
-      window.location.href = "example.html";
-    }, 1400);
-  }
-
-  // Init
-  bootScreen();
-  renderPrompt();
-  terminal.focus();
-  scrollToBottom();
-  setInterval(() => terminal.focus(), 500);
-</script>
+    setInterval(() => terminal.focus(), 500);
+  </script>
+</body>
+</html>
