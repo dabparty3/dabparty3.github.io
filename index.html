@@ -124,7 +124,6 @@
       const inputLine = document.getElementById("input").textContent;
       const fullLine = PROMPT + inputLine;
 
-      // Remove the current input line
       const last = terminal.lastElementChild;
       if (last) terminal.removeChild(last);
 
@@ -172,13 +171,18 @@
       scrollToBottom();
     });
 
-    // Ensure terminal is always focused
-    setInterval(() => terminal.focus(), 500);
+    function bootScreen() {
+      renderLine("Car Door Terminal [Version 10.0.19045.5965]");
+      renderLine("(c) CarDoor Corporations. All rights reserved.");
+      renderLine(""); // Blank line before first prompt
+    }
 
     // Init
+    bootScreen();
     renderPrompt();
     terminal.focus();
     scrollToBottom();
+    setInterval(() => terminal.focus(), 500);
   </script>
 </body>
 </html>
