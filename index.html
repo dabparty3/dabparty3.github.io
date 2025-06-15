@@ -90,6 +90,17 @@
       width: 100%;
       height: 100%;
     }
+
+    /* Static overlay style */
+    #static-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: url('static.gif') center center / cover no-repeat black;
+      z-index: 10002;
+    }
   </style>
 </head>
 <body>
@@ -103,6 +114,7 @@
     let history = [];
     let historyIndex = -1;
     let input = "";
+    let inputEnabled = true; // New flag to disable terminal input when iframe active
 
     const commands = {
       help: () => `Available commands:
@@ -139,8 +151,11 @@ example1    - Overlay example page over this page`,
       },
 
       example1: () => {
-        renderLine("Opening example overlay...");
-        setTimeout(showExampleOverlay, 500);
+        renderLine("Activating static, then opening example overlay...");
+        inputEnabled = false;  // disable input now
+        showStaticOverlay().then(() => {
+          showExampleOverlay();
+        });
         return "";
       }
     };
@@ -168,6 +183,8 @@ example1    - Overlay example page over this page`,
     }
 
     function commitInput() {
+      if (!inputEnabled) return; // ignore input if disabled
+
       const inputText = input;
       const full = `${PROMPT}${inputText}`;
 
@@ -182,6 +199,7 @@ example1    - Overlay example page over this page`,
     }
 
     function updateInput() {
+      if (!inputEnabled) return; // ignore input updates if disabled
       const inputEl = document.getElementById("input");
       if (inputEl) inputEl.textContent = input;
     }
@@ -196,31 +214,34 @@ example1    - Overlay example page over this page`,
       renderLine("Use 'help' for a list of commands.\n");
     }
 
-    // Static overlay with audio for "example"
+    // Static overlay with audio for 3 seconds
     function showStaticOverlay() {
-      if(document.getElementById('static-overlay')) return;
+      return new Promise((resolve) => {
+        if(document.getElementById('static-overlay')) return resolve();
 
-      const overlay = document.createElement('div');
-      overlay.id = 'static-overlay';
-      overlay.style = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: url('static.gif') center center / cover no-repeat black;
-        z-index: 9999;
-      `;
-      document.body.appendChild(overlay);
+        const overlay = document.createElement('div');
+        overlay.id = 'static-overlay';
+        overlay.style = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: url('static.gif') center center / cover no-repeat black;
+          z-index: 10002;
+        `;
+        document.body.appendChild(overlay);
 
-      const audio = new Audio('static.wav');
-      audio.play();
+        const audio = new Audio('static.wav');
+        audio.play();
 
-      setTimeout(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        overlay.remove();
-      }, 3000);
+        setTimeout(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          overlay.remove();
+          resolve();
+        }, 3000);
+      });
     }
 
     // Show the example page as a fullscreen iframe overlay
@@ -233,7 +254,13 @@ example1    - Overlay example page over this page`,
       const closeBtn = document.createElement('button');
       closeBtn.id = 'example-overlay-close';
       closeBtn.textContent = "Close Overlay";
-      closeBtn.onclick = () => overlay.remove();
+      closeBtn.onclick = async () => {
+        inputEnabled = false; // disable input during static unload
+        await showStaticOverlay();
+        overlay.remove();
+        inputEnabled = true; // re-enable terminal input
+        terminal.focus();
+      };
 
       const iframe = document.createElement('iframe');
       iframe.id = 'example-iframe';
@@ -246,7 +273,10 @@ example1    - Overlay example page over this page`,
     }
 
     terminal.addEventListener('keydown', (e) => {
-      e.preventDefault();
+      if (!inputEnabled) {
+        e.preventDefault();
+        return; // block all key inputs while disabled
+      }
 
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
         input += e.key;
