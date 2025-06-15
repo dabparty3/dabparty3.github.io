@@ -61,7 +61,7 @@
 </head>
 <body>
   <div id="terminal-wrapper">
-    <div id="terminal"></div>
+    <div id="terminal" tabindex="0"></div>
   </div>
 
   <script>
@@ -149,7 +149,8 @@ example1    - Show static & play static.wav`,
     }
 
     function updateInput() {
-      document.getElementById("input").textContent = input;
+      const inputEl = document.getElementById("input");
+      if (inputEl) inputEl.textContent = input;
     }
 
     function scrollToBottom() {
