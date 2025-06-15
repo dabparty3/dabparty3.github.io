@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Terminal</title>
+  <title>The Lobby</title>
   <style>
     body {
       margin: 0;
@@ -9,11 +9,20 @@
       color: #00ff00;
       font-family: monospace;
       padding: 10px;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #terminal-wrapper {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     #terminal {
+      flex-grow: 1;
+      overflow-y: auto;
       white-space: pre-wrap;
-      outline: none;
     }
 
     .input-line {
@@ -32,6 +41,16 @@
       color: #0f0;
     }
 
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      animation: blink 1s step-start 0s infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
     ::selection {
       background: #00ff00;
       color: black;
@@ -39,7 +58,9 @@
   </style>
 </head>
 <body>
-  <div id="terminal" tabindex="0"></div>
+  <div id="terminal-wrapper">
+    <div id="terminal" tabindex="0"></div>
+  </div>
 
   <script>
     const terminal = document.getElementById('terminal');
@@ -66,10 +87,10 @@
     }
 
     function renderPrompt() {
-      const line = document.createElement('div');
-      line.className = "input-line";
-      line.innerHTML = `<span class="prompt">${PROMPT}</span><span class="command" id="input"></span><span class="cursor">█</span>`;
-      terminal.appendChild(line);
+      const promptLine = document.createElement('div');
+      promptLine.className = "input-line";
+      promptLine.innerHTML = `<span class="prompt">${PROMPT}</span><span class="command" id="input"></span><span class="cursor">█</span>`;
+      terminal.appendChild(promptLine);
     }
 
     function processCommand(cmd) {
@@ -85,25 +106,30 @@
       }
     }
 
-    function newPrompt() {
-      renderPrompt();
-      terminal.scrollTop = terminal.scrollHeight;
-    }
-
     function commitInput() {
-      const inputEl = document.getElementById("input");
-      const cmdText = input;
-      inputEl.textContent = cmdText;
-      renderLine(`${PROMPT}${cmdText}`);
-      history.push(cmdText);
+      const inputLine = document.getElementById("input").textContent;
+      const fullLine = PROMPT + inputLine;
+
+      // Remove the current input line
+      const last = terminal.lastElementChild;
+      if (last) terminal.removeChild(last);
+
+      renderLine(fullLine);
+      history.push(inputLine);
       historyIndex = history.length;
-      processCommand(cmdText);
+      processCommand(inputLine);
       input = "";
-      newPrompt();
+      renderPrompt();
+      scrollToBottom();
     }
 
     function updateInput() {
-      document.getElementById("input").textContent = input;
+      const inputEl = document.getElementById("input");
+      if (inputEl) inputEl.textContent = input;
+    }
+
+    function scrollToBottom() {
+      terminal.scrollTop = terminal.scrollHeight;
     }
 
     terminal.addEventListener('keydown', (e) => {
@@ -129,11 +155,16 @@
         }
       }
       updateInput();
+      scrollToBottom();
     });
 
+    // Ensure terminal is always focused
+    setInterval(() => terminal.focus(), 500);
+
     // Init
-    newPrompt();
+    renderPrompt();
     terminal.focus();
+    scrollToBottom();
   </script>
 </body>
 </html>
