@@ -75,7 +75,7 @@
     let input = "";
 
     const commands = {
-      help: () => "Available commands:\nhelp - Shows list of commands\nclear - Clear the terminal\necho [text] - Repeat text\nabout - Info about this page\nfullscreen - Make the page fullscreen\nexample - Simulate CRT shutdown & go to example.html",
+      help: () => "Available commands:\nhelp - Shows list of commands\nclear - Clear the terminal\necho [text] - Repeat text\nabout - Info about this page\nfullscreen - Make the page fullscreen\nexample - Simulate CRT shutdown & go to example.html\nexample1 - Show static.gif and play static.wav",
       clear: () => {
         terminal.innerHTML = "";
         return "";
@@ -94,6 +94,11 @@
       example: () => {
         renderLine("Running example...");
         setTimeout(() => playCRTShutdown(), 500);
+        return "";
+      },
+      example1: () => {
+        renderLine("Activating static...");
+        setTimeout(() => showStaticOverlay(), 500);
         return "";
       }
     };
@@ -210,13 +215,33 @@
 
       setTimeout(() => {
         const dot = document.getElementById("dot");
-        if (dot) dot.remove(); // Remove the dot completely here
+        if (dot) dot.remove();
         overlay.style.background = "black";
       }, 700);
 
       setTimeout(() => {
         window.location.href = "example.html";
       }, 1400);
+    }
+
+    function showStaticOverlay() {
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.background = `url('static.gif') center center / cover no-repeat black`;
+      overlay.style.zIndex = '9999';
+      document.body.appendChild(overlay);
+
+      const audio = new Audio('static.wav');
+      audio.play();
+
+      // Optional: auto-remove static after a few seconds
+      setTimeout(() => {
+        overlay.remove();
+      }, 3000);
     }
 
     // Init
