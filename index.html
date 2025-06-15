@@ -63,13 +63,32 @@
       position: fixed;
       top: 10px;
       right: 10px;
-      z-index: 10000;
+      z-index: 10001;
       background: #222;
       color: #0f0;
       border: 1px solid #0f0;
       padding: 5px 10px;
       cursor: pointer;
       font-family: monospace;
+    }
+
+    /* Fullscreen iframe overlay */
+    #example-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #000;
+      z-index: 10000;
+      border: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #example-iframe {
+      flex-grow: 1;
+      border: none;
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -93,7 +112,7 @@ echo [text] - Repeat text
 about       - Info about this page
 fullscreen  - Make the page fullscreen
 example     - Show static & play static.wav
-example1    - Show example overlay`,
+example1    - Overlay example page over this page`,
 
       clear: () => {
         terminal.innerHTML = "";
@@ -120,7 +139,7 @@ example1    - Show example overlay`,
       },
 
       example1: () => {
-        renderLine("Loading example overlay...");
+        renderLine("Opening example overlay...");
         setTimeout(showExampleOverlay, 500);
         return "";
       }
@@ -179,7 +198,6 @@ example1    - Show example overlay`,
 
     // Static overlay with audio for "example"
     function showStaticOverlay() {
-      // Prevent multiple overlays
       if(document.getElementById('static-overlay')) return;
 
       const overlay = document.createElement('div');
@@ -205,50 +223,25 @@ example1    - Show example overlay`,
       }, 3000);
     }
 
-    // Show the example page as an overlay on top of the terminal
+    // Show the example page as a fullscreen iframe overlay
     function showExampleOverlay() {
-      // Check if overlay already exists
       if(document.getElementById('example-overlay')) return;
 
       const overlay = document.createElement('div');
       overlay.id = 'example-overlay';
-      overlay.style = `
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background: #000;
-        z-index: 9999;
-        overflow: auto;
-        color: #0f0;
-        font-family: monospace;
-        padding: 20px;
-      `;
 
       const closeBtn = document.createElement('button');
       closeBtn.id = 'example-overlay-close';
       closeBtn.textContent = "Close Overlay";
       closeBtn.onclick = () => overlay.remove();
 
+      const iframe = document.createElement('iframe');
+      iframe.id = 'example-iframe';
+      iframe.src = 'https://dabparty3.github.io/example';
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups');
+
       overlay.appendChild(closeBtn);
-
-      // Fetch the external page content
-      fetch('https://dabparty3.github.io/example')
-        .then(response => {
-          if (!response.ok) throw new Error('Failed to load example page');
-          return response.text();
-        })
-        .then(html => {
-          const contentDiv = document.createElement('div');
-          contentDiv.innerHTML = html;
-
-          // Optionally sanitize or remove scripts here if you want
-
-          overlay.appendChild(contentDiv);
-        })
-        .catch(err => {
-          overlay.textContent = "Error loading example page: " + err.message;
-        });
-
+      overlay.appendChild(iframe);
       document.body.appendChild(overlay);
     }
 
