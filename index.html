@@ -1,15 +1,139 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>The Lobby</title>
-    <style>
-      
-    </style>
-  </head>
-  <body>
-    <p>
-      this is gonna be barebones for a while
-      i'll do cool stuff with this one day
-    </p>
-  </body>
+<head>
+  <title>The Lobby</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #00ff00;
+      font-family: monospace;
+      padding: 10px;
+    }
+
+    #terminal {
+      white-space: pre-wrap;
+      outline: none;
+    }
+
+    .input-line {
+      display: inline;
+    }
+
+    .prompt {
+      color: #0f0;
+    }
+
+    .command {
+      color: #fff;
+    }
+
+    .output {
+      color: #0f0;
+    }
+
+    ::selection {
+      background: #00ff00;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal" tabindex="0"></div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const PROMPT = "guest@thelobby:~$ ";
+    let history = [];
+    let historyIndex = -1;
+    let input = "";
+
+    const commands = {
+      help: () => "Available commands:\nhelp - Show this help\nclear - Clear the terminal\necho [text] - Repeat text\nabout - Info about this page",
+      clear: () => {
+        terminal.innerHTML = "";
+        return "";
+      },
+      echo: (args) => args.join(" "),
+      about: () => "Welcome to The Lobby. This is a static terminal-style interface. Have fun!"
+    };
+
+    function renderLine(text, className = "output") {
+      const line = document.createElement('div');
+      line.className = className;
+      line.textContent = text;
+      terminal.appendChild(line);
+    }
+
+    function renderPrompt() {
+      const line = document.createElement('div');
+      line.className = "input-line";
+      line.innerHTML = `<span class="prompt">${PROMPT}</span><span class="command" id="input"></span><span class="cursor">█</span>`;
+      terminal.appendChild(line);
+    }
+
+    function processCommand(cmd) {
+      if (!cmd.trim()) return;
+      const args = cmd.split(" ");
+      const base = args.shift().toLowerCase();
+      const action = commands[base];
+      if (action) {
+        const result = action(args);
+        if (result) renderLine(result);
+      } else {
+        renderLine(`Command not found: ${base}`);
+      }
+    }
+
+    function newPrompt() {
+      renderPrompt();
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function commitInput() {
+      const inputEl = document.getElementById("input");
+      const cmdText = input;
+      inputEl.textContent = cmdText;
+      renderLine(`${PROMPT}${cmdText}`);
+      history.push(cmdText);
+      historyIndex = history.length;
+      processCommand(cmdText);
+      input = "";
+      newPrompt();
+    }
+
+    function updateInput() {
+      document.getElementById("input").textContent = input;
+    }
+
+    terminal.addEventListener('keydown', (e) => {
+      e.preventDefault();
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        input += e.key;
+      } else if (e.key === "Backspace") {
+        input = input.slice(0, -1);
+      } else if (e.key === "Enter") {
+        commitInput();
+      } else if (e.key === "ArrowUp") {
+        if (historyIndex > 0) {
+          historyIndex--;
+          input = history[historyIndex];
+        }
+      } else if (e.key === "ArrowDown") {
+        if (historyIndex < history.length - 1) {
+          historyIndex++;
+          input = history[historyIndex];
+        } else {
+          input = "";
+          historyIndex = history.length;
+        }
+      }
+      updateInput();
+    });
+
+    // Init
+    newPrompt();
+    terminal.focus();
+  </script>
+</body>
 </html>
