@@ -28,10 +28,7 @@
       overflow-y: auto;
       white-space: pre-wrap;
       padding: 10px;
-    }
-
-    .input-line {
-      display: inline;
+      outline: none;
     }
 
     .prompt {
@@ -49,7 +46,7 @@
     .cursor {
       display: inline-block;
       width: 10px;
-      animation: blink 1s step-start 0s infinite;
+      animation: blink 1s step-start infinite;
     }
 
     @keyframes blink {
@@ -64,7 +61,7 @@
 </head>
 <body>
   <div id="terminal-wrapper">
-    <div id="terminal" tabindex="0"></div>
+    <div id="terminal"></div>
   </div>
 
   <script>
@@ -83,29 +80,34 @@ about       - Info about this page
 fullscreen  - Make the page fullscreen
 example     - Redirect to example.html
 example1    - Show static & play static.wav`,
+
       clear: () => {
         terminal.innerHTML = "";
         return "";
       },
+
       echo: (args) => args.join(" "),
+
       about: () => "Hey there. This is something I made to house my projects... It's pretty cool, right?",
+
       fullscreen: () => {
         const el = document.documentElement;
         if (el.requestFullscreen) {
           el.requestFullscreen();
           return "Entering fullscreen...";
-        } else {
-          return "Fullscreen not supported.";
         }
+        return "Fullscreen not supported.";
       },
+
       example: () => {
         renderLine("Opening example.html...");
         setTimeout(() => window.location.href = "example.html", 500);
         return "";
       },
+
       example1: () => {
         renderLine("Activating static...");
-        setTimeout(() => showStaticOverlay(), 500);
+        setTimeout(showStaticOverlay, 500);
         return "";
       }
     };
@@ -118,52 +120,74 @@ example1    - Show static & play static.wav`,
     }
 
     function renderPrompt() {
-      const promptLine = document.createElement('div');
-      promptLine.className = "input-line";
-      promptLine.innerHTML = `<span class="prompt">${PROMPT}</span><span class="command" id="input"></span><span class="cursor">█</span>`;
-      terminal.appendChild(promptLine);
-    }
-
-    function processCommand(cmd) {
-      if (!cmd.trim()) return;
-      const args = cmd.split(" ");
-      const base = args.shift().toLowerCase();
-      const action = commands[base];
-      if (action) {
-        const result = action(args);
-        if (result) renderLine(result);
-      } else {
-        renderLine(`Command not found: ${base}`);
-      }
-    }
-
-    function commitInput() {
-      const inputLine = document.getElementById("input").textContent;
-      const fullLine = PROMPT + inputLine;
-
-      const last = terminal.lastElementChild;
-      if (last) terminal.removeChild(last);
-
-      renderLine(fullLine);
-      history.push(inputLine);
-      historyIndex = history.length;
-      processCommand(inputLine);
-      input = "";
-      renderPrompt();
+      const line = document.createElement('div');
+      line.innerHTML = `<span class="prompt">${PROMPT}</span><span class="command" id="input"></span><span class="cursor">█</span>`;
+      terminal.appendChild(line);
       scrollToBottom();
     }
 
+    function processCommand(cmd) {
+      const args = cmd.trim().split(" ");
+      const base = args.shift().toLowerCase();
+      const action = commands[base];
+      const result = action ? action(args) : `Command not found: ${base}`;
+      if (result) renderLine(result);
+    }
+
+    function commitInput() {
+      const inputText = input;
+      const full = `${PROMPT}${inputText}`;
+
+      terminal.lastElementChild?.remove(); // remove current input line
+      renderLine(full);
+      history.push(inputText);
+      historyIndex = history.length;
+      processCommand(inputText);
+
+      input = "";
+      renderPrompt();
+    }
+
     function updateInput() {
-      const inputEl = document.getElementById("input");
-      if (inputEl) inputEl.textContent = input;
+      document.getElementById("input").textContent = input;
     }
 
     function scrollToBottom() {
       terminal.scrollTop = terminal.scrollHeight;
     }
 
+    function bootScreen() {
+      renderLine("Car Door Terminal [Version 10.0.19045.5965]");
+      renderLine("(c) CarDoor Corporations. All rights reserved.");
+      renderLine("Use 'help' for a list of commands.\n");
+    }
+
+    function showStaticOverlay() {
+      const overlay = document.createElement('div');
+      overlay.style = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: url('static.gif') center center / cover no-repeat black;
+        z-index: 9999;
+      `;
+      document.body.appendChild(overlay);
+
+      const audio = new Audio('static.wav');
+      audio.play();
+
+      setTimeout(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        overlay.remove();
+      }, 3000);
+    }
+
     terminal.addEventListener('keydown', (e) => {
       e.preventDefault();
+
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
         input += e.key;
       } else if (e.key === "Backspace") {
@@ -184,43 +208,15 @@ example1    - Show static & play static.wav`,
           historyIndex = history.length;
         }
       }
+
       updateInput();
       scrollToBottom();
     });
-
-    function bootScreen() {
-      renderLine("Car Door Terminal [Version 10.0.19045.5965]");
-      renderLine("(c) CarDoor Corporations. All rights reserved.");
-      renderLine("Use 'help' for a list of commands.");
-      renderLine("");
-    }
-
-    function showStaticOverlay() {
-      const overlay = document.createElement('div');
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100vw';
-      overlay.style.height = '100vh';
-      overlay.style.background = `url('static.gif') center center / cover no-repeat black`;
-      overlay.style.zIndex = '9999';
-      document.body.appendChild(overlay);
-
-      const audio = new Audio('static.wav');
-      audio.play();
-
-      setTimeout(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        overlay.remove();
-      }, 3000);
-    }
 
     // Init
     bootScreen();
     renderPrompt();
     terminal.focus();
-    scrollToBottom();
     setInterval(() => terminal.focus(), 500);
   </script>
 </body>
