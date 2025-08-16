@@ -90,8 +90,7 @@
       width: 100%;
       height: 100%;
     }
-
-    /* Static overlay style */
+    
     #static-overlay {
       position: fixed;
       top: 0;
@@ -99,7 +98,7 @@
       width: 100vw;
       height: 100vh;
       background: url('static.gif') center center / cover no-repeat black;
-      z-index: 10002; /* On top of iframe */
+      z-index: 10002;
     }
   </style>
 </head>
@@ -114,7 +113,7 @@
     let history = [];
     let historyIndex = -1;
     let input = "";
-    let inputEnabled = true; // disable input when overlay active
+    let inputEnabled = true;
 
     const commands = {
       help: () => `Available commands:
